@@ -1,0 +1,51 @@
+services:
+  openldap:
+    image: bitnami/openldap:latest
+    container_name: openldap
+    hostname: ldap.example.org
+    environment:
+      LDAP_ADMIN_USERNAME: admin
+      LDAP_ADMIN_PASSWORD: admin
+      LDAP_DOMAIN: example.org
+    ports:
+      - "1389:1389"
+    volumes:
+      - openldap_data:/bitnami/openldap
+      - ./openldap:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "ldapsearch -x -H ldap://localhost:1389 -D 'cn=admin,dc=example,dc=org' -w ${LDAP_ADMIN_PASSWORD:-admin} -b 'dc=example,dc=org' '(objectClass=*)' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  kerberos:
+    build: ./kerberos
+    container_name: kerberos
+    environment:
+      REALM: "EXAMPLE.ORG"
+      DOMAIN_REALM: "example.org"
+      KERB_MASTER_KEY: "masterkey"
+      KERB_ADMIN_USER: "admin"
+      KERB_ADMIN_PASS: "admin"
+      SEARCH_DOMAINS: "ldap.example.org"
+      LDAP_DC: "dc=example,dc=org"
+      LDAP_USER: admin
+      LDAP_PASS: admin
+      LDAP_URL: "ldap://ldap.example.org:1389"
+      
+    depends_on:
+      openldap:
+        condition: service_healthy
+    ports:
+      - "1188:88/udp"       # KDC
+      - "11749:749"         # kadmind
+    volumes:
+      - ./kerberos/krb5.conf:/etc/krb5.conf
+      - ./kerberos/kdc.conf:/etc/krb5kdc/kdc.conf
+      - ./kerberos/ldap.conf:/etc/ldap/ldap.conf
+      - ./kerberos/init_ldap.ldif:/home/init_ldap.ldif
+      - kerberos_data:/etc/krb5kdc   # persist KDC DB, stash, keytabs
+
+volumes:
+  openldap_data:
+  kerberos_data:
