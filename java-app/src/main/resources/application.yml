@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    sun.security.krb5: DEBUG
+    com.sun.security.auth.module.Krb5LoginModule: DEBUG
+    org.springframework.security.kerberos: DEBUG
+    org.springframework.security.ldap.search: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

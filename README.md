@@ -33,3 +33,15 @@ export KRB5_CONFIG=$PWD/krb5-client.conf
 echo mypassword | kinit --password-file=STDIN user123@EXAMPLE.ORG
 
 ```
+
+## Java app integration
+
+The sample java app validates the kerberos ticket (SPNEGO) and lookup ldap to discover groups for the user.
+
+```bash
+# no auth required
+curlie -v http://localhost:8080/api/public
+
+# authenticates and returns user/groups representation
+curlie -v --negotiate -u : http://localhost:8080/api/user
+```

@@ -5,11 +5,9 @@ RUN apt-get update -y && apt-get install -y krb5-kdc-ldap krb5-admin-server ldap
 
 EXPOSE 88 464 749
 
-RUN mkdir -p /etc/openldap/certs
+RUN mkdir -p /etc/keytabs
 
-# ADD ./ldap/ldap.conf /etc/ldap/ldap.conf
 ADD ./entrypoint.sh /entrypoint.sh
-# ADD ./init_ldap.ldif /home
 
 RUN chmod 644 /etc/ldap/ldap.conf && chmod +x /entrypoint.sh
 

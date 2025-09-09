@@ -45,7 +45,26 @@ services:
       - ./kerberos/ldap.conf:/etc/ldap/ldap.conf
       - ./kerberos/init_ldap.ldif:/home/init_ldap.ldif
       - kerberos_data:/etc/krb5kdc   # persist KDC DB, stash, keytabs
+      - kerberos_keytabs:/etc/keytabs
+
+  java-app:
+    build: ./java-app
+    container_name: java-app
+    environment:
+      APP_KEYTAB_LOCATION: /etc/keytabs/java-app.keytab
+      JAVA_TOOL_OPTIONS: "-Djava.security.krb5.conf=/etc/krb5.conf -Dsun.security.krb5.debug=true"
+    depends_on:
+      kerberos:
+        condition: service_started
+      openldap:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./kerberos/krb5.conf:/etc/krb5.conf:ro
+      - kerberos_keytabs:/etc/keytabs
 
 volumes:
   openldap_data:
   kerberos_data:
+  kerberos_keytabs:

@@ -25,10 +25,16 @@ EOF
   echo "########### Creating service principal for user123 ##############"
   kadmin.local -q "add_principal -x linkdn=cn=user123,OU=ServiceAccount,OU=Kafka,OU=Prod,OU=Infrastructure,DC=example,DC=org -pw mypassword user123"
 
+  echo "########### Creating service principal for Java HTTP service ##############"
+  kadmin.local -q "add_principal -randkey HTTP/example.org@EXAMPLE.ORG"
+
   echo "########### Exporting Kerberos Ticket for kafka ##############"
-  kadmin.local -q "ktadd -k /tmp/kafka.service.keytab kafka/kafka@EXAMPLE.ORG"
+  kadmin.local -q "ktadd -k /etc/keytabs/kafka.service.keytab kafka/kafka@EXAMPLE.ORG"
   
-  echo "###### Check Kafka Ticket on server side"
+  echo "########### Exporting Kerberos Ticket for Java HTTP service ##############"
+  kadmin.local -q "ktadd -k /etc/keytabs/java-app.keytab HTTP/example.org@EXAMPLE.ORG"
+  
+  echo "###### Check tickets on server side"
   ls -l /tmp/
 }
 
